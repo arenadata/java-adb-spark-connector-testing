@@ -37,7 +37,7 @@ mvn clean package -X
 
 ### Local test execution for transfer from PostgreSQL/Greenplum/ADB to Hadoop/ADH:
 ```bash
-hdfs dfs -rmr "/tmp/test.parquet*"
+hdfs dfs -rmr "/tmp/test_dir/test.parquet*"
 /opt/spark/bin/spark-submit \
   --master spark://localhost:7077 \
   --jars $GSC_JAR \
