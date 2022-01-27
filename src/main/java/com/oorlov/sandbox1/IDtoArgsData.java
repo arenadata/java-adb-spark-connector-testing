@@ -15,6 +15,10 @@ public interface IDtoArgsData {
     void setDbTestTable(String value) throws Exception;
     String getDbCountAlias();
     void setDbCountAlias(String value) throws Exception;
+    String getHdfsHost();
+    void setHdfsHost(String value) throws Exception;
+    String getHdfsInputPath();
+    void setHdfsInputPath(String value) throws Exception;
     String getHdfsOutputPath();
     void setHdfsOutputPath(String value) throws Exception;
     String getSparkMasterHost();
@@ -25,4 +29,6 @@ public interface IDtoArgsData {
     void setAdbConnectorUsageValue(boolean value);
     int getSliceDelta();
     void setSliceDelta(int value) throws Exception;
+    EToolAction getToolAction();
+    void setToolAction(String value) throws Exception;
 }

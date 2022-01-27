@@ -46,6 +46,12 @@ public class CliArgsHandler implements ICliArgsHandler {
                 case "db_count_alias":
                     dto.setDbCountAlias(value);
                     break;
+                case "hdfs_host":
+                    dto.setHdfsHost(value);
+                    break;
+                case "hdfs_input_path":
+                    dto.setHdfsInputPath(value);
+                    break;
                 case "hdfs_output_path":
                     dto.setHdfsOutputPath(value);
                     break;
@@ -60,6 +66,9 @@ public class CliArgsHandler implements ICliArgsHandler {
                     break;
                 case "use_adb_connector":
                     dto.setAdbConnectorUsageValue(Boolean.valueOf(value));
+                    break;
+                case "tool_action":
+                    dto.setToolAction(value);
                     break;
                 default:
                     throw new Exception(String.format("You've provided some invalid argument (k/v): %s/%s.",key, value));

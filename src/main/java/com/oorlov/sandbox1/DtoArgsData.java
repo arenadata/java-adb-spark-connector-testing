@@ -1,5 +1,4 @@
 package com.oorlov.sandbox1;
-import org.apache.commons.lang.NullArgumentException;
 
 public class DtoArgsData implements IDtoArgsData {
     private String  _jdbcConnectionString;
@@ -9,27 +8,22 @@ public class DtoArgsData implements IDtoArgsData {
     private String  _dbTestSchema;
     private String  _dbTestTable;
     private String  _dbCountAlias;
+    private String  _hdfsHost;
+    private String  _hdfsInputPath;
     private String  _hdfsOutputPath;
     private String  _sparkMasterHost;
     private String  _sparkAppName;
     private boolean _useAdbConnector = false;
     private int     _sliceDelta = -1;
+    private EToolAction _toolAction = EToolAction.None;
     private final int DEFAULT_MULTIPLE_VALUE = 100;
-
-    private void checkInputString(String value) throws Exception {
-        if (value == null)
-            throw new NullArgumentException("The given string object can't be null");
-
-        if (value.length() == 0)
-            throw new Exception("The given string value mustn't be equal zero.");
-    }
 
     public String getJdbcConnectionString() {
         return this._jdbcConnectionString;
     }
 
     public void setJdbcConnectionString(String value) throws Exception {
-        checkInputString(value);
+        IDataHandler.checkInputString(value);
         this._jdbcConnectionString = value;
     }
 
@@ -38,7 +32,7 @@ public class DtoArgsData implements IDtoArgsData {
     }
 
     public void setDbDriver(String value) throws Exception {
-        checkInputString(value);
+        IDataHandler.checkInputString(value);
         this._dbDriver = value;
     }
 
@@ -47,7 +41,7 @@ public class DtoArgsData implements IDtoArgsData {
     }
 
     public void setDbUser(String value) throws Exception {
-        checkInputString(value);
+        IDataHandler.checkInputString(value);
         this._dbUser = value;
     }
 
@@ -56,7 +50,7 @@ public class DtoArgsData implements IDtoArgsData {
     }
 
     public void setDbPwd(String value) throws Exception {
-        checkInputString(value);
+        IDataHandler.checkInputString(value);
         this._dbPwd = value;
     }
 
@@ -65,7 +59,7 @@ public class DtoArgsData implements IDtoArgsData {
     }
 
     public void setDbTestSchema(String value) throws Exception {
-        checkInputString(value);
+        IDataHandler.checkInputString(value);
         this._dbTestSchema = value;
     }
 
@@ -74,7 +68,7 @@ public class DtoArgsData implements IDtoArgsData {
     }
 
     public void setDbTestTable(String value) throws Exception {
-        checkInputString(value);
+        IDataHandler.checkInputString(value);
         this._dbTestTable = value;
     }
 
@@ -83,8 +77,26 @@ public class DtoArgsData implements IDtoArgsData {
     }
 
     public void setDbCountAlias(String value) throws Exception {
-        checkInputString(value);
+        IDataHandler.checkInputString(value);
         this._dbCountAlias = value;
+    }
+
+    public String getHdfsHost() {
+        return this._hdfsHost;
+    }
+
+    public void setHdfsHost(String value) throws Exception {
+        IDataHandler.checkInputString(value);
+        this._hdfsHost = value;
+    }
+
+    public String getHdfsInputPath() {
+        return this._hdfsInputPath;
+    }
+
+    public void setHdfsInputPath(String value) throws Exception {
+        IDataHandler.checkInputString(value);
+        this._hdfsInputPath = value;
     }
 
     public String getHdfsOutputPath() {
@@ -92,7 +104,7 @@ public class DtoArgsData implements IDtoArgsData {
     }
 
     public void setHdfsOutputPath(String value) throws Exception {
-        checkInputString(value);
+        IDataHandler.checkInputString(value);
         this._hdfsOutputPath = value;
     }
 
@@ -101,7 +113,7 @@ public class DtoArgsData implements IDtoArgsData {
     }
 
     public void setSparkMasterHost(String value) throws Exception {
-        checkInputString(value);
+        IDataHandler.checkInputString(value);
         this._sparkMasterHost = value;
     }
 
@@ -110,7 +122,7 @@ public class DtoArgsData implements IDtoArgsData {
     }
 
     public void setSparkAppName(String value) throws Exception {
-        checkInputString(value);
+        IDataHandler.checkInputString(value);
         this._sparkAppName = value;
     }
 
@@ -127,5 +139,22 @@ public class DtoArgsData implements IDtoArgsData {
             throw new Exception(String.format("The input integer value isn't multiple of %s.", DEFAULT_MULTIPLE_VALUE));
 
         this._sliceDelta = value;
+    }
+
+    public EToolAction getToolAction() { return this._toolAction; }
+
+    public void setToolAction(String value) throws Exception {
+        IDataHandler.checkInputString(value);
+
+        switch (value) {
+            case "fromhdfstordbms":
+                this._toolAction = EToolAction.ReadHdfsAndWriteToRdbms;
+                break;
+            case "fromrdbmstohdfs":
+                this._toolAction = EToolAction.ReadRdbmsAndWriteToHdfs;
+                break;
+            default:
+                throw new Exception("Invalid value for the 'tool action'. Possible values are: fromrdbmstohdfs, fromhdfstordbms");
+        }
     }
 }
