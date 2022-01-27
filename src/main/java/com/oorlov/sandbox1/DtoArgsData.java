@@ -6,7 +6,8 @@ public class DtoArgsData implements IDtoArgsData {
     private String  _dbUser;
     private String  _dbPwd;
     private String  _dbTestSchema;
-    private String  _dbTestTable;
+    private String  _dbImportTable;
+    private String  _dbExportTable;
     private String  _dbCountAlias;
     private String  _hdfsHost;
     private String  _hdfsInputPath;
@@ -63,13 +64,22 @@ public class DtoArgsData implements IDtoArgsData {
         this._dbTestSchema = value;
     }
 
-    public String getDbTestTable() {
-        return this._dbTestTable;
+    public String getDbImportTable() {
+        return this._dbImportTable;
     }
 
-    public void setDbTestTable(String value) throws Exception {
+    public void setDbImportTable(String value) throws Exception {
         IDataHandler.checkInputString(value);
-        this._dbTestTable = value;
+        this._dbImportTable = value;
+    }
+
+    public String getDbExportTable() {
+        return this._dbExportTable;
+    }
+
+    public void setDbExportTable(String value) throws Exception {
+        IDataHandler.checkInputString(value);
+        this._dbExportTable = value;
     }
 
     public String getDbCountAlias() {

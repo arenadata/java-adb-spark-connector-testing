@@ -40,8 +40,11 @@ public class CliArgsHandler implements ICliArgsHandler {
                 case "db_test_schema":
                     dto.setDbTestSchema(value);
                     break;
-                case "db_test_table":
-                    dto.setDbTestTable(value);
+                case "db_import_table":
+                    dto.setDbImportTable(value);
+                    break;
+                case "db_export_table":
+                    dto.setDbExportTable(value);
                     break;
                 case "db_count_alias":
                     dto.setDbCountAlias(value);

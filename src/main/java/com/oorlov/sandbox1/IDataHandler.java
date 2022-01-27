@@ -14,7 +14,7 @@ public interface IDataHandler {
             throw new Exception("The given string value mustn't be equal zero.");
     }
 
-    int getTotalRecordsAmount() throws SQLException;
+    int getTotalRecordsAmount() throws Exception;
     Row[] testSampleDataFetching(Dataset<Row> dataset) throws Exception;
     void saveToHdfs(Dataset<Row> dataset) throws Exception;
     SparkConf createSparkConfig();

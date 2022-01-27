@@ -42,19 +42,38 @@ public class DataHandler implements IDataHandler {
         return properties;
     }
 
-    private Dataset<Row> prepareDatasetProvider(SQLContext sqlContext) {
+    private String getTargetTableName() throws Exception {
+        String targetTable = null;
+        EToolAction currentAction = _argsData.getToolAction();
+
+        switch (currentAction) {
+            case ReadRdbmsAndWriteToHdfs:
+                targetTable = _argsData.getDbImportTable();
+                break;
+            case ReadHdfsAndWriteToRdbms:
+                targetTable = _argsData.getDbExportTable();
+                break;
+            default:
+                throw new Exception("Can't fetch the target table name, due the invalid current action value.");
+        }
+
+        _logger.info(String.format("The target table for '%s' action will be: '%s'.", currentAction, targetTable));
+        return targetTable;
+    }
+
+    private Dataset<Row> prepareDatasetProvider(SQLContext sqlContext) throws Exception {
         if (sqlContext == null)
             throw new NullArgumentException("The input SQL-context object can't be null.");
 
         return (!_argsData.getAdbConnectorUsageValue())
-        ? sqlContext.read().jdbc(_argsData.getJdbcConnectionString(), _argsData.getDbTestTable(), prepareDbProperties())
+        ? sqlContext.read().jdbc(_argsData.getJdbcConnectionString(), getTargetTableName(), prepareDbProperties())
         : sqlContext.read()
         .format("adb")
         .option("spark.adb.url"      , _argsData.getJdbcConnectionString())
         .option("spark.adb.user"     , _argsData.getDbUser())
         .option("spark.adb.password" , _argsData.getDbPwd())
         .option("spark.adb.dbschema" , _argsData.getDbTestSchema())
-        .option("spark.adb.dbtable"  , _argsData.getDbTestTable())
+        .option("spark.adb.dbtable"  , getTargetTableName())
         .load();
     }
 
@@ -116,12 +135,13 @@ public class DataHandler implements IDataHandler {
         return managedItems;
     }
 
-    public int getTotalRecordsAmount() throws SQLException {
+    public int getTotalRecordsAmount() throws Exception {
         final Connection connection = prepareJdbcConnection();
+        final String targetTable    = getTargetTableName();
         final String sqlQuery       = String.format("SELECT COUNT(*) AS %s FROM %s.%s",
             _argsData.getDbCountAlias(),
             _argsData.getDbTestSchema(),
-            _argsData.getDbTestTable()
+            targetTable
         );
 
         _logger.info(String.format("There will be executed the next query: %s", sqlQuery));
@@ -195,10 +215,15 @@ public class DataHandler implements IDataHandler {
     }
 
     public void saveToRdbms(ArrayList<IManagedRowItem> inputData) throws Exception {
-        Connection connection = prepareJdbcConnection();
+        final Connection connection = prepareJdbcConnection();
+        final String queryTemplate  = String.format(
+         "INSERT INTO %s.%s VALUES(?, ?, ?, ?)",
+            _argsData.getDbTestSchema(),
+            getTargetTableName()
+        );
 
         for (IManagedRowItem item : inputData) {
-            PreparedStatement statement = connection.prepareStatement("INSERT INTO public.export_test_table VALUES(?, ?, ?, ?)");
+            PreparedStatement statement = connection.prepareStatement(queryTemplate);
             statement.setInt(ManagedRowItem.STATEMENT_POSITION_FIELD_ID, item.getId());
             statement.setDate(ManagedRowItem.STATEMENT_POSITION_FIELD_DATETIME, item.getDatetime());
             statement.setString(ManagedRowItem.STATEMENT_POSITION_FIELD_VALUE, item.getValue());

@@ -43,7 +43,7 @@ hdfs dfs -rmr "/tmp/test_dir/test.parquet*"
   --jars $GSC_JAR \
   --class com.oorlov.sandbox1.Main \
   /tmp/sparkDbToHdfs-1.0-SNAPSHOT-jar-with-dependencies.jar \
-  jdbc_db_connstr=jdbc:postgresql://localhost:5432/test_adb_connector_v1 db_user=<user> db_pwd=<pwd> db_test_schema=public db_test_table=test_table db_count_alias=total_count db_driver=org.postgresql.Driver hdfs_host=hdfs://localhost:9000 hdfs_input_path=/tmp/test_dir hdfs_output_path=/tmp/test_dir/test.parquet tool_action=fromhdfstordbms spark_app_name=DbToHdfsTransfers slice_delta_value=500 spark_master_host=local[*]
+  jdbc_db_connstr=jdbc:postgresql://localhost:5432/test_adb_connector_v1 db_user=<user> db_pwd=<pwd> db_test_schema=public db_import_table=test_table db_export_table=export_test_table db_count_alias=total_count db_driver=org.postgresql.Driver hdfs_host=hdfs://localhost:9000 hdfs_input_path=/tmp/test_dir hdfs_output_path=/tmp/test_dir/test.parquet tool_action=fromhdfstordbms spark_app_name=DbToHdfsTransfers slice_delta_value=500 spark_master_host=local[*]
 ```
 
 ### Remote test execution for transfer from Hadoop/ADH to PostgreSQL/Greenplum/ADB:
@@ -55,7 +55,7 @@ sudo -u spark /usr/bin/spark-submit \
   --jars $GSC_JAR \
   --class com.oorlov.sandbox1.Main \
   /tmp/sparkDbToHdfs-1.0-SNAPSHOT-jar-with-dependencies.jar \
-  jdbc_db_connstr=jdbc:postgresql://<remote-greenplum-host>:5432/test_adb_connector_v1 db_user=<user> db_pwd=<pwd> db_test_schema=public db_test_table=test_table db_count_alias=total_count db_driver=org.postgresql.Driver use_adb_connector=true hdfs_host=hdfs://localhost:9000 hdfs_input_path=/tmp/test_dir hdfs_output_path=/tmp/test_dir/test.parquet tool_action=fromhdfstordbms spark_app_name=DbToHdfsTransfers slice_delta_value=25000 spark_master_host=local[*]
+  jdbc_db_connstr=jdbc:postgresql://<remote-greenplum-host>:5432/test_adb_connector_v1 db_user=<user> db_pwd=<pwd> db_test_schema=public db_import_table=test_table db_export_table=export_test_table db_count_alias=total_count db_driver=org.postgresql.Driver use_adb_connector=true hdfs_host=hdfs://localhost:9000 hdfs_input_path=/tmp/test_dir hdfs_output_path=/tmp/test_dir/test.parquet tool_action=fromhdfstordbms spark_app_name=DbToHdfsTransfers slice_delta_value=25000 spark_master_host=local[*]
 ```
 
 ### JMX options:

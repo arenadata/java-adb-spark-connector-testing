@@ -11,8 +11,10 @@ public interface IDtoArgsData {
     void setDbPwd(String value) throws Exception;
     String getDbTestSchema();
     void setDbTestSchema(String value) throws Exception;
-    String getDbTestTable();
-    void setDbTestTable(String value) throws Exception;
+    String getDbImportTable();
+    void setDbImportTable(String value) throws Exception;
+    String getDbExportTable();
+    void setDbExportTable(String value) throws Exception;
     String getDbCountAlias();
     void setDbCountAlias(String value) throws Exception;
     String getHdfsHost();
