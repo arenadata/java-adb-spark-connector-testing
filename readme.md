@@ -26,8 +26,8 @@ hdfs dfs -rmr "/tmp/test.parquet*"
 
 ### Or remotely:
 ```bash
-sudo -u spark /usr/bin/hdfs dfs -ls /tmp/
-sudo -u spark /usr/bin/hdfs dfs -rmr "/tmp/test.parquet*"
+sudo -u spark /usr/bin/hdfs dfs -ls /tmp/test_dir
+sudo -u spark /usr/bin/hdfs dfs -rmr "/tmp/test_dir/test.parquet*"
 ```
 
 ### Build project:
@@ -35,7 +35,7 @@ sudo -u spark /usr/bin/hdfs dfs -rmr "/tmp/test.parquet*"
 mvn clean package -X
 ```
 
-### Local PostgreSQL test execution:
+### Local test execution for transfer from PostgreSQL/Greenplum/ADB to Hadoop/ADH:
 ```bash
 hdfs dfs -rmr "/tmp/test.parquet*"
 /opt/spark/bin/spark-submit \
@@ -43,24 +43,27 @@ hdfs dfs -rmr "/tmp/test.parquet*"
   --jars $GSC_JAR \
   --class com.oorlov.sandbox1.Main \
   /tmp/sparkDbToHdfs-1.0-SNAPSHOT-jar-with-dependencies.jar \
-  jdbc_db_connstr=jdbc:postgresql://localhost:5432/test_adb_connector_v1 db_user=<user> db_pwd=<pwd> db_test_schema=public db_test_table=test_table db_count_alias=total_count db_driver=org.postgresql.Driver hdfs_output_path=hdfs://localhost:9000/tmp/test.parquet spark_app_name=DbToHdfsTransfers slice_delta_value=500 spark_master_host=local[*]
+  jdbc_db_connstr=jdbc:postgresql://localhost:5432/test_adb_connector_v1 db_user=<user> db_pwd=<pwd> db_test_schema=public db_test_table=test_table db_count_alias=total_count db_driver=org.postgresql.Driver hdfs_host=hdfs://localhost:9000 hdfs_input_path=/tmp/test_dir hdfs_output_path=/tmp/test_dir/test.parquet tool_action=fromhdfstordbms spark_app_name=DbToHdfsTransfers slice_delta_value=500 spark_master_host=local[*]
 ```
 
-### Remote ADH test execution:
+### Remote test execution for transfer from Hadoop/ADH to PostgreSQL/Greenplum/ADB:
 ```bash
-sudo -u spark /usr/bin/hdfs dfs -rmr "/tmp/test.parquet*"
+sudo -u spark /usr/bin/hdfs dfs -rmr "/tmp/test_dir/test.parquet*"
 sudo rm -f /tmp/report.txt
 sudo -u spark /usr/bin/spark-submit \
   --master spark://localhost:7077 \
   --jars $GSC_JAR \
   --class com.oorlov.sandbox1.Main \
   /tmp/sparkDbToHdfs-1.0-SNAPSHOT-jar-with-dependencies.jar \
-  jdbc_db_connstr=jdbc:postgresql://<remote-greenplum-host>:5432/test_adb_connector_v1 db_user=<user> db_pwd=<pwd> db_test_schema=public db_test_table=test_table db_count_alias=total_count db_driver=org.postgresql.Driver use_adb_connector=true hdfs_output_path=/tmp/test.parquet spark_app_name=DbToHdfsTransfers slice_delta_value=25000 spark_master_host=local[*]
+  jdbc_db_connstr=jdbc:postgresql://<remote-greenplum-host>:5432/test_adb_connector_v1 db_user=<user> db_pwd=<pwd> db_test_schema=public db_test_table=test_table db_count_alias=total_count db_driver=org.postgresql.Driver use_adb_connector=true hdfs_host=hdfs://localhost:9000 hdfs_input_path=/tmp/test_dir hdfs_output_path=/tmp/test_dir/test.parquet tool_action=fromhdfstordbms spark_app_name=DbToHdfsTransfers slice_delta_value=25000 spark_master_host=local[*]
 ```
 
 ### JMX options:
 ```bash
--Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9178 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false
+-Dcom.sun.management.jmxremote
+-Dcom.sun.management.jmxremote.port=9178
+-Dcom.sun.management.jmxremote.authenticate=false
+-Dcom.sun.management.jmxremote.ssl=false
 
 /usr/lib/jvm/java-1.8.0-openjdk-amd64/bin/jconsole localhost:9178
 ```
