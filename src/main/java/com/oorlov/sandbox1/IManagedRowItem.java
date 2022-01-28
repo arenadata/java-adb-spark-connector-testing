@@ -7,7 +7,7 @@ public interface IManagedRowItem {
     Date getDatetime();
     void setDatetime(Date value);
     String getValue();
-    void setValue(String value) throws Exception;
+    void setValue(String value);
     int getPart();
     void setPart(int value);
 }

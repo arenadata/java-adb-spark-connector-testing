@@ -1,24 +1,21 @@
 package com.oorlov.sandbox1;
-import java.sql.*;
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import org.apache.commons.lang.NullArgumentException;
 import org.apache.spark.sql.*;
 import org.apache.spark.SparkConf;
 
 public interface IDataHandler {
-    static void checkInputString(String value) throws Exception {
-        if (value == null)
-            throw new NullArgumentException("The given string object can't be null");
-
-        if (value.length() == 0)
-            throw new Exception("The given string value mustn't be equal zero.");
+    static void checkInputString(String value) {
+        if (value == null || value.length() == 0)
+            throw new NullArgumentException("The given string object can't be null or equal zero.");
     }
 
-    int getTotalRecordsAmount() throws Exception;
-    Row[] testSampleDataFetching(Dataset<Row> dataset) throws Exception;
-    void saveToHdfs(Dataset<Row> dataset) throws Exception;
+    int getTotalRecordsAmount() throws CustomException, SQLException;
+    void saveToHdfs(Dataset<Row> dataset) throws CustomException, SQLException;
+    ArrayList<IManagedRowItem> readFromHdfs(SparkSession sparkSession) throws IOException;
+    void saveToRdbms(ArrayList<IManagedRowItem> inputData) throws CustomException, SQLException;
     SparkConf createSparkConfig();
-    void startTransaction() throws Exception;
-    ArrayList<IManagedRowItem> readFromHdfs(SQLContext sqlContext) throws Exception;
-    void saveToRdbms(ArrayList<IManagedRowItem> inputData) throws Exception;
+    void startTransaction();
 }

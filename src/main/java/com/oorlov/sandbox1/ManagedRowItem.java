@@ -13,35 +13,35 @@ public class ManagedRowItem implements IManagedRowItem {
     public static final int STATEMENT_POSITION_FIELD_VALUE    = 3;
     public static final int STATEMENT_POSITION_FIELD_PART     = 4;
 
-    private int    _id;
-    private Date   _datetime;
-    private String _value;
-    private int    _part;
+    private int    id;
+    private Date   datetime;
+    private String value;
+    private int    part;
 
     public int getId() {
-        return this._id;
+        return this.id;
     }
 
     public void setId(int value) {
-        this._id = value;
+        this.id = value;
     }
 
-    public Date getDatetime() { return this._datetime; }
+    public Date getDatetime() { return this.datetime; }
 
     public void setDatetime(Date value) {
-        this._datetime = value;
+        this.datetime = value;
     }
 
-    public String getValue() { return this._value; }
+    public String getValue() { return this.value; }
 
-    public void setValue(String value) throws Exception {
+    public void setValue(String value) {
         IDataHandler.checkInputString(value);
-        this._value = value;
+        this.value = value;
     }
 
-    public int getPart() { return this._part; }
+    public int getPart() { return this.part; }
 
     public void setPart(int value) {
-        this._part = value;
+        this.part = value;
     }
 }

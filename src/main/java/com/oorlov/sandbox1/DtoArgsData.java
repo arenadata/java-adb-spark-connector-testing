@@ -1,170 +1,170 @@
 package com.oorlov.sandbox1;
 
 public class DtoArgsData implements IDtoArgsData {
-    private String  _jdbcConnectionString;
-    private String  _dbDriver;
-    private String  _dbUser;
-    private String  _dbPwd;
-    private String  _dbTestSchema;
-    private String  _dbImportTable;
-    private String  _dbExportTable;
-    private String  _dbCountAlias;
-    private String  _hdfsHost;
-    private String  _hdfsInputPath;
-    private String  _hdfsOutputPath;
-    private String  _sparkMasterHost;
-    private String  _sparkAppName;
-    private boolean _useAdbConnector = false;
-    private int     _sliceDelta = -1;
-    private EToolAction _toolAction = EToolAction.None;
-    private final int DEFAULT_MULTIPLE_VALUE = 100;
+    private static final int DEFAULT_MULTIPLE_VALUE = 100;
+    private String  jdbcConnectionString;
+    private String  dbDriver;
+    private String  dbUser;
+    private String  dbPwd;
+    private String  dbTestSchema;
+    private String  dbImportTable;
+    private String  dbExportTable;
+    private String  dbCountAlias;
+    private String  hdfsHost;
+    private String  hdfsInputPath;
+    private String  hdfsOutputPath;
+    private String  sparkMasterHost;
+    private String  sparkAppName;
+    private boolean useAdbConnector = false;
+    private int     sliceDelta      = -1;
+    private EToolAction toolAction  = EToolAction.NONE;
 
     public String getJdbcConnectionString() {
-        return this._jdbcConnectionString;
+        return this.jdbcConnectionString;
     }
 
-    public void setJdbcConnectionString(String value) throws Exception {
+    public void setJdbcConnectionString(String value) {
         IDataHandler.checkInputString(value);
-        this._jdbcConnectionString = value;
+        this.jdbcConnectionString = value;
     }
 
     public String getDbDriver() {
-        return this._dbDriver;
+        return this.dbDriver;
     }
 
-    public void setDbDriver(String value) throws Exception {
+    public void setDbDriver(String value) {
         IDataHandler.checkInputString(value);
-        this._dbDriver = value;
+        this.dbDriver = value;
     }
 
     public String getDbUser() {
-        return this._dbUser;
+        return this.dbUser;
     }
 
-    public void setDbUser(String value) throws Exception {
+    public void setDbUser(String value) {
         IDataHandler.checkInputString(value);
-        this._dbUser = value;
+        this.dbUser = value;
     }
 
     public String getDbPwd() {
-        return this._dbPwd;
+        return this.dbPwd;
     }
 
-    public void setDbPwd(String value) throws Exception {
+    public void setDbPwd(String value) {
         IDataHandler.checkInputString(value);
-        this._dbPwd = value;
+        this.dbPwd = value;
     }
 
     public String getDbTestSchema() {
-        return this._dbTestSchema;
+        return this.dbTestSchema;
     }
 
-    public void setDbTestSchema(String value) throws Exception {
+    public void setDbTestSchema(String value) {
         IDataHandler.checkInputString(value);
-        this._dbTestSchema = value;
+        this.dbTestSchema = value;
     }
 
     public String getDbImportTable() {
-        return this._dbImportTable;
+        return this.dbImportTable;
     }
 
-    public void setDbImportTable(String value) throws Exception {
+    public void setDbImportTable(String value) {
         IDataHandler.checkInputString(value);
-        this._dbImportTable = value;
+        this.dbImportTable = value;
     }
 
     public String getDbExportTable() {
-        return this._dbExportTable;
+        return this.dbExportTable;
     }
 
-    public void setDbExportTable(String value) throws Exception {
+    public void setDbExportTable(String value) {
         IDataHandler.checkInputString(value);
-        this._dbExportTable = value;
+        this.dbExportTable = value;
     }
 
     public String getDbCountAlias() {
-        return this._dbCountAlias;
+        return this.dbCountAlias;
     }
 
-    public void setDbCountAlias(String value) throws Exception {
+    public void setDbCountAlias(String value) {
         IDataHandler.checkInputString(value);
-        this._dbCountAlias = value;
+        this.dbCountAlias = value;
     }
 
     public String getHdfsHost() {
-        return this._hdfsHost;
+        return this.hdfsHost;
     }
 
-    public void setHdfsHost(String value) throws Exception {
+    public void setHdfsHost(String value) {
         IDataHandler.checkInputString(value);
-        this._hdfsHost = value;
+        this.hdfsHost = value;
     }
 
     public String getHdfsInputPath() {
-        return this._hdfsInputPath;
+        return this.hdfsInputPath;
     }
 
-    public void setHdfsInputPath(String value) throws Exception {
+    public void setHdfsInputPath(String value) {
         IDataHandler.checkInputString(value);
-        this._hdfsInputPath = value;
+        this.hdfsInputPath = value;
     }
 
     public String getHdfsOutputPath() {
-        return this._hdfsOutputPath;
+        return this.hdfsOutputPath;
     }
 
-    public void setHdfsOutputPath(String value) throws Exception {
+    public void setHdfsOutputPath(String value) {
         IDataHandler.checkInputString(value);
-        this._hdfsOutputPath = value;
+        this.hdfsOutputPath = value;
     }
 
     public String getSparkMasterHost() {
-        return this._sparkMasterHost;
+        return this.sparkMasterHost;
     }
 
-    public void setSparkMasterHost(String value) throws Exception {
+    public void setSparkMasterHost(String value) {
         IDataHandler.checkInputString(value);
-        this._sparkMasterHost = value;
+        this.sparkMasterHost = value;
     }
 
     public String getSparkAppName() {
-        return this._sparkAppName;
+        return this.sparkAppName;
     }
 
-    public void setSparkAppName(String value) throws Exception {
+    public void setSparkAppName(String value) {
         IDataHandler.checkInputString(value);
-        this._sparkAppName = value;
+        this.sparkAppName = value;
     }
 
-    public void setAdbConnectorUsageValue(boolean value) { this._useAdbConnector = value; }
+    public void setAdbConnectorUsageValue(boolean value) { this.useAdbConnector = value; }
 
-    public boolean getAdbConnectorUsageValue() { return this._useAdbConnector; }
+    public boolean getAdbConnectorUsageValue() { return this.useAdbConnector; }
 
     public int getSliceDelta() {
-        return this._sliceDelta;
+        return this.sliceDelta;
     }
 
-    public void setSliceDelta(int value) throws Exception {
+    public void setSliceDelta(int value) throws CustomException {
         if (value % DEFAULT_MULTIPLE_VALUE != 0)
-            throw new Exception(String.format("The input integer value isn't multiple of %s.", DEFAULT_MULTIPLE_VALUE));
+            throw new CustomException(String.format("The input integer value isn't multiple of %s.", DEFAULT_MULTIPLE_VALUE));
 
-        this._sliceDelta = value;
+        this.sliceDelta = value;
     }
 
-    public EToolAction getToolAction() { return this._toolAction; }
+    public EToolAction getToolAction() { return this.toolAction; }
 
-    public void setToolAction(String value) throws Exception {
+    public void setToolAction(String value) throws CustomException {
         IDataHandler.checkInputString(value);
 
         switch (value) {
             case "fromhdfstordbms":
-                this._toolAction = EToolAction.ReadHdfsAndWriteToRdbms;
+                this.toolAction = EToolAction.READ_HDFS_AND_WRITE_TO_RDBMS;
                 break;
             case "fromrdbmstohdfs":
-                this._toolAction = EToolAction.ReadRdbmsAndWriteToHdfs;
+                this.toolAction = EToolAction.READ_RDBMS_AND_WRITE_TO_HDFS;
                 break;
             default:
-                throw new Exception("Invalid value for the 'tool action'. Possible values are: fromrdbmstohdfs, fromhdfstordbms");
+                throw new CustomException("Invalid value for the 'tool action'. Possible values are: fromrdbmstohdfs, fromhdfstordbms");
         }
     }
 }

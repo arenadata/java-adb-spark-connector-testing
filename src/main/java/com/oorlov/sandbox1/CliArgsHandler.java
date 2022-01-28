@@ -5,17 +5,21 @@ import org.apache.commons.lang.NullArgumentException;
 import org.apache.log4j.Logger;
 
 public class CliArgsHandler implements ICliArgsHandler {
-    private final Logger _logger;
-    private final String DEFAULT_SPLIT_SYMBOL = "=";
+    private static final String DEFAULT_SPLIT_SYMBOL = "=";
+    private final Logger logger;
 
     public CliArgsHandler(Logger logger) {
         if (logger == null)
             throw new NullArgumentException("The input logger object can't be null.");
 
-        _logger = logger;
+        this.logger = logger;
     }
 
-    public DtoArgsData createManagedDto(String[] cliRawArgs) throws Exception {
+    public DtoArgsData createManagedDto(String[] cliRawArgs) throws CustomException {
+        if (cliRawArgs == null || cliRawArgs.length == 0)
+            throw new NullArgumentException("The given raw CLI-args object can't be null or equal zero.");
+
+        logger.info(String.format("Provided CLI-arguments: %s", Arrays.toString(cliRawArgs)));
         ArrayList<String> args = new ArrayList<>(Arrays.asList(cliRawArgs));
         DtoArgsData dto = new DtoArgsData();
 
@@ -59,7 +63,7 @@ public class CliArgsHandler implements ICliArgsHandler {
                     dto.setHdfsOutputPath(value);
                     break;
                 case "slice_delta_value":
-                    dto.setSliceDelta(Integer.valueOf(value));
+                    dto.setSliceDelta(Integer.parseInt(value));
                     break;
                 case "spark_master_host":
                     dto.setSparkMasterHost(value);
@@ -68,13 +72,13 @@ public class CliArgsHandler implements ICliArgsHandler {
                     dto.setSparkAppName(value);
                     break;
                 case "use_adb_connector":
-                    dto.setAdbConnectorUsageValue(Boolean.valueOf(value));
+                    dto.setAdbConnectorUsageValue(Boolean.parseBoolean(value));
                     break;
                 case "tool_action":
                     dto.setToolAction(value);
                     break;
                 default:
-                    throw new Exception(String.format("You've provided some invalid argument (k/v): %s/%s.",key, value));
+                    throw new CustomException(String.format("You've provided some invalid argument (k/v): %s/%s.", key, value));
             }
         }
 

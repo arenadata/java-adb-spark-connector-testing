@@ -72,3 +72,9 @@ sudo -u spark /usr/bin/spark-submit \
 ```bash
 jar tvf /tmp/sparkDbToHdfs-1.0-SNAPSHOT-jar-with-dependencies.jar | grep -in "oorlov"
 ```
+
+### Scan the Java project via the Maven SonarQube scanner plugin:
+```bash
+# Tested with the local SonarQube CE service, v9.2.4.50792
+mvn clean verify sonar:sonar -Dsonar.login="<token-value>" -X
+```

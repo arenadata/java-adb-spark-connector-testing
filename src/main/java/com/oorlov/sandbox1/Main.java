@@ -13,7 +13,6 @@ public class Main {
             dataHandler.startTransaction();
         } catch (Exception exception) {
             _logger.error(exception);
-            exception.printStackTrace();
         }
     }
 }
