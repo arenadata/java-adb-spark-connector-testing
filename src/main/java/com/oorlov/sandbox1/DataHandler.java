@@ -270,7 +270,7 @@ public class DataHandler implements IDataHandler {
 
         try {
             final SparkSession.Builder builder = SparkSession.builder();
-            SparkConf sparkConfiguration = createSparkConfig();
+            final SparkConf sparkConfiguration = createSparkConfig();
             sparkSession = builder.config(sparkConfiguration).getOrCreate();
 
             switch (argsData.getToolAction()) {
