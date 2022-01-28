@@ -1,3 +1,5 @@
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=java-adb-spark-connector-testing&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=java-adb-spark-connector-testing) [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=java-adb-spark-connector-testing&metric=bugs)](https://sonarcloud.io/summary/new_code?id=java-adb-spark-connector-testing) [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=java-adb-spark-connector-testing&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=java-adb-spark-connector-testing) [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=java-adb-spark-connector-testing&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=java-adb-spark-connector-testing) [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=java-adb-spark-connector-testing&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=java-adb-spark-connector-testing) [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=java-adb-spark-connector-testing&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=java-adb-spark-connector-testing) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=java-adb-spark-connector-testing&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=java-adb-spark-connector-testing) [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=java-adb-spark-connector-testing&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=java-adb-spark-connector-testing) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=java-adb-spark-connector-testing&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=java-adb-spark-connector-testing)
+
 ### What's this repo?
 
 Hello, this repo includes Java-app, which I've developed for Arenadata.
@@ -77,4 +79,7 @@ jar tvf /tmp/sparkDbToHdfs-1.0-SNAPSHOT-jar-with-dependencies.jar | grep -in "oo
 ```bash
 # Tested with the local SonarQube CE service, v9.2.4.50792
 mvn clean verify sonar:sonar -Dsonar.login="<token-value>" -X
+
+# Tested with the public SonarCloud service:
+mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=java-adb-spark-connector-testing
 ```
