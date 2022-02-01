@@ -65,6 +65,18 @@ public class CliArgsHandler implements ICliArgsHandler {
                 case "slice_delta_value":
                     dto.setSliceDelta(Integer.parseInt(value));
                     break;
+                case "core_pool_size":
+                    dto.setCorePoolSize(Integer.parseInt(value));
+                    break;
+                case "maximum_pool_size":
+                    dto.setMaximumPoolSize(Integer.parseInt(value));
+                    break;
+                case "keep_alive_time":
+                    dto.setKeepAliveTime(Long.parseLong(value));
+                    break;
+                case "pool_queue_size":
+                    dto.setPoolQueueSize(Integer.parseInt(value));
+                    break;
                 case "spark_master_host":
                     dto.setSparkMasterHost(value);
                     break;

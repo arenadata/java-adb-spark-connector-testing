@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Properties;
+import java.util.concurrent.*;
 import org.apache.commons.lang.NullArgumentException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
@@ -11,13 +12,21 @@ import org.apache.spark.sql.*;
 import org.apache.spark.SparkConf;
 
 public class DataHandler implements IDataHandler {
+    // Consts
     private static final String  DEFAULT_HDFS_FS_CONFIG_KEY     = "fs.default.name";
     private static final String  NOT_NEEDED_METAFILE_SUFFIX     = "_SUCCESS";
     private static final Boolean DO_RECURSIVE_ITERATION_IN_HDFS = true;
     private static final int     JDBC_RESULT_FOR_SAVED_ROW      = 1;
     private static final int     DEFAULT_NAN_TOTAL_COUNT_VALUE  = -1;
-    private final Logger       logger;
+    private static final int     DEFAULT_SUCCESSFUL_EXIT_CODE   = 0;
+    // Immutable objects
+    private final Logger logger;
     private final IDtoArgsData argsData;
+    private final ThreadPoolExecutor threadPool;
+    // Mutable objects
+    private ParquetCollection parquetParts;
+    private String lastParentName;
+    private ArrayList<Path> files;
 
     public DataHandler(Logger logger, IDtoArgsData argsData) {
         if (logger == null)
@@ -26,8 +35,15 @@ public class DataHandler implements IDataHandler {
         if (argsData == null)
             throw new NullArgumentException("The input DTO CliArgs object can't be null.");
 
-        this.logger   = logger;
-        this.argsData = argsData;
+        this.logger     = logger;
+        this.argsData   = argsData;
+        this.threadPool = new ThreadPoolExecutor(
+            argsData.getCorePoolSize(),
+            argsData.getMaximumPoolSize(),
+            argsData.getKeepAliveTime(),
+            TimeUnit.SECONDS,
+            new ArrayBlockingQueue<>(argsData.getPoolQueueSize())) { public void terminated() { super.terminated(); }
+        };
     }
 
     private Properties prepareDbProperties() {
@@ -113,7 +129,46 @@ public class DataHandler implements IDataHandler {
         return connection;
     }
 
-    private ArrayList<IManagedRowItem> prepareManagedRows(SparkSession sparkSession, ArrayList<Path> files) {
+    private FileSystem createHdfsFileSystemObject() throws IOException {
+        Configuration configuration = new Configuration();
+        configuration.set(DEFAULT_HDFS_FS_CONFIG_KEY, argsData.getHdfsHost());
+        return FileSystem.get(configuration);
+    }
+
+    private ArrayList<IManagedRowItem> handleLastParquetPart(ArrayList<Path> files, Path parentPath, String parentName, SparkSession sparkSession) {
+        parquetParts = new ParquetCollection();
+        parquetParts.parentName = parentName;
+
+        if (!parentPath.getName().contains(NOT_NEEDED_METAFILE_SUFFIX))
+            files.add(parentPath);
+
+        parquetParts.files = files;
+
+        try {
+            ParquetCollection clonedObject = (ParquetCollection)parquetParts.clone();
+            threadPool.execute(new ParallelRowsHandler(logger, this, sparkSession, clonedObject));
+        } catch (Exception exception) {
+            logger.error(exception);
+        }
+
+        return prepareManagedRows(sparkSession, files);
+    }
+
+    private void handleMiddlewareParquetParts(ArrayList<Path> files, String parentName, SparkSession sparkSession) {
+        parquetParts.files = files;
+
+        try {
+            ParquetCollection clonedObject = (ParquetCollection)parquetParts.clone();
+            this.files     = new ArrayList<>();
+            parquetParts   = null;
+            lastParentName = parentName;
+            threadPool.execute(new ParallelRowsHandler(logger, this, sparkSession, clonedObject));
+        } catch (Exception exception) {
+            logger.error(exception);
+        }
+    }
+
+    public ArrayList<IManagedRowItem> prepareManagedRows(SparkSession sparkSession, ArrayList<Path> files) {
         if (sparkSession == null)
             throw new NullArgumentException("Can't prepare the managed rows 'arraylist', due the input Spark-session object can't be null.");
 
@@ -197,24 +252,42 @@ public class DataHandler implements IDataHandler {
         }
     }
 
-    public ArrayList<IManagedRowItem> readFromHdfs(SparkSession sparkSession) throws IOException {
+    public ArrayList<IManagedRowItem> handleSavedHdfsData(SparkSession sparkSession) throws IOException {
         if (sparkSession == null)
             throw new NullArgumentException("Can't read from HDFS, due the input Spark-session object can't be null.");
 
-        Configuration conf = new Configuration();
-        conf.set(DEFAULT_HDFS_FS_CONFIG_KEY, argsData.getHdfsHost());
-        FileSystem fileSystem = FileSystem.get(conf);
-        ArrayList<Path> files = new ArrayList<>();
+        files = new ArrayList<>();
+        FileSystem fileSystem = createHdfsFileSystemObject();
         RemoteIterator<LocatedFileStatus> iterator = fileSystem.listFiles(new Path(argsData.getHdfsInputPath()), DO_RECURSIVE_ITERATION_IN_HDFS);
 
         while (iterator.hasNext()) {
             LocatedFileStatus fileStatus = iterator.next();
-            Path filePath = fileStatus.getPath();
+            Path filePath                = fileStatus.getPath();
+            Path parentPath              = filePath.getParent();
+            String parentName            = parentPath.getName();
 
-            if (!filePath.getName().contains(NOT_NEEDED_METAFILE_SUFFIX))
-                files.add(filePath);
+            if (parquetParts == null)
+                parquetParts = new ParquetCollection();
 
-            logger.info(filePath);
+            if (lastParentName == null)
+                lastParentName = parentName;
+
+            if (!iterator.hasNext())
+                return handleLastParquetPart(files, filePath, parentName, sparkSession);
+
+            if (lastParentName.equals(parentName))
+                parquetParts.parentName = parentName;
+            else if (!lastParentName.equals(parentName))
+                handleMiddlewareParquetParts(files, parentName, sparkSession);
+
+            try {
+                if (!filePath.getName().contains(NOT_NEEDED_METAFILE_SUFFIX))
+                    files.add(filePath);
+            } catch (Exception exception) {
+                logger.error(exception);
+            }
+
+            logger.info(String.format("Handled the next parquet-part from HDFS: %s", filePath));
         }
 
         return prepareManagedRows(sparkSession, files);
@@ -267,11 +340,14 @@ public class DataHandler implements IDataHandler {
 
     public void startTransaction() {
         SparkSession sparkSession = null;
+        DummyThread dummyThread   = null;
 
         try {
             final SparkSession.Builder builder = SparkSession.builder();
             final SparkConf sparkConfiguration = createSparkConfig();
             sparkSession = builder.config(sparkConfiguration).getOrCreate();
+            dummyThread  = new DummyThread(logger, threadPool);
+            dummyThread.start();
 
             switch (argsData.getToolAction()) {
                 case READ_RDBMS_AND_WRITE_TO_HDFS:
@@ -279,8 +355,8 @@ public class DataHandler implements IDataHandler {
                     saveToHdfs(dataset);
                     break;
                 case READ_HDFS_AND_WRITE_TO_RDBMS:
-                    final ArrayList<IManagedRowItem> items = readFromHdfs(sparkSession);
-                    saveToRdbms(items);
+                    handleSavedHdfsData(sparkSession);
+                    dummyThread.join();
                     break;
                 default:
                     throw new CustomException("There is no supported tool action you've provided.");
@@ -290,6 +366,8 @@ public class DataHandler implements IDataHandler {
         } finally {
             if (sparkSession != null)
                 sparkSession.close();
+
+            System.exit(DEFAULT_SUCCESSFUL_EXIT_CODE);
         }
     }
 }

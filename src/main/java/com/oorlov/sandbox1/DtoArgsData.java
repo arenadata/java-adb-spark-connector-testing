@@ -2,6 +2,7 @@ package com.oorlov.sandbox1;
 
 public class DtoArgsData implements IDtoArgsData {
     private static final int DEFAULT_MULTIPLE_VALUE = 100;
+    private static final int DEFAULT_INT_INIT_VALUE = -1;
     private String  jdbcConnectionString;
     private String  dbDriver;
     private String  dbUser;
@@ -16,7 +17,11 @@ public class DtoArgsData implements IDtoArgsData {
     private String  sparkMasterHost;
     private String  sparkAppName;
     private boolean useAdbConnector = false;
-    private int     sliceDelta      = -1;
+    private int     sliceDelta      = DEFAULT_INT_INIT_VALUE;
+    private int     corePoolSize    = DEFAULT_INT_INIT_VALUE;
+    private int     maximumPoolSize = DEFAULT_INT_INIT_VALUE;
+    private int     poolQueueSize   = DEFAULT_INT_INIT_VALUE;
+    private long    keepAliveTime   = DEFAULT_INT_INIT_VALUE;
     private EToolAction toolAction  = EToolAction.NONE;
 
     public String getJdbcConnectionString() {
@@ -149,6 +154,44 @@ public class DtoArgsData implements IDtoArgsData {
             throw new CustomException(String.format("The input integer value isn't multiple of %s.", DEFAULT_MULTIPLE_VALUE));
 
         this.sliceDelta = value;
+    }
+
+    public int getCorePoolSize() {
+        return this.corePoolSize;
+    }
+
+    public void setCorePoolSize(int value) throws CustomException {
+        if (value <= 0)
+            throw new CustomException("The given core pool size value can't be less than zero can't be equal to it.");
+
+        this.corePoolSize = value;
+    }
+
+    public int getMaximumPoolSize() { return this.maximumPoolSize; }
+
+    public void setMaximumPoolSize(int value) throws CustomException {
+        if (value <= 0)
+            throw new CustomException("The given maximum pool size value can't be less than zero can't be equal to it.");
+
+        this.maximumPoolSize = value;
+    }
+
+    public long getKeepAliveTime() { return this.keepAliveTime; }
+
+    public void setKeepAliveTime(long value) throws CustomException {
+        if (value <= 0)
+            throw new CustomException("The given keep-alive time value can't be less than zero can't be equal to it.");
+
+        this.keepAliveTime = value;
+    }
+
+    public int getPoolQueueSize() { return this.poolQueueSize; }
+
+    public void setPoolQueueSize(int value) throws CustomException {
+        if (value <= 0)
+            throw new CustomException("The given pool queue size value can't be less than zero can't be equal to it.");
+
+        this.poolQueueSize = value;
     }
 
     public EToolAction getToolAction() { return this.toolAction; }

@@ -31,6 +31,14 @@ public interface IDtoArgsData {
     void setAdbConnectorUsageValue(boolean value);
     int getSliceDelta();
     void setSliceDelta(int value) throws CustomException;
+    int getCorePoolSize();
+    void setCorePoolSize(int value) throws CustomException;
+    int getMaximumPoolSize();
+    void setMaximumPoolSize(int value) throws CustomException;
+    long getKeepAliveTime();
+    void setKeepAliveTime(long value) throws CustomException;
+    int getPoolQueueSize();
+    void setPoolQueueSize(int value) throws CustomException;
     EToolAction getToolAction();
     void setToolAction(String value) throws CustomException;
 }
