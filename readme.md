@@ -78,8 +78,9 @@ jar tvf /tmp/sparkDbToHdfs-1.0-SNAPSHOT-jar-with-dependencies.jar | grep -in "oo
 ### Scan the Java project via the Maven SonarQube scanner plugin:
 ```bash
 # Tested with the local SonarQube CE service, v9.2.4.50792
-mvn clean verify sonar:sonar -Dsonar.login="<token-value>" -X
+mvn clean verify sonar:sonar -Dsonar.host.url="http://localhost:9000" -Dsonar.login="<sonar-local-token-value>" -X
 
 # Tested with the public SonarCloud service:
+export SONAR_TOKEN="<sonar-cloud-token-value>"
 mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=java-adb-spark-connector-testing
 ```

@@ -19,6 +19,7 @@ public class DataHandler implements IDataHandler {
     private static final int     JDBC_RESULT_FOR_SAVED_ROW      = 1;
     private static final int     DEFAULT_NAN_TOTAL_COUNT_VALUE  = -1;
     private static final int     DEFAULT_SUCCESSFUL_EXIT_CODE   = 0;
+    private static final int     DEFAULT_UNSUCCESSFUL_EXIT_CODE = 1;
     // Immutable objects
     private final Logger logger;
     private final IDtoArgsData argsData;
@@ -42,8 +43,10 @@ public class DataHandler implements IDataHandler {
             argsData.getMaximumPoolSize(),
             argsData.getKeepAliveTime(),
             TimeUnit.SECONDS,
-            new ArrayBlockingQueue<>(argsData.getPoolQueueSize())) { public void terminated() { super.terminated(); }
-        };
+            new ArrayBlockingQueue<>(argsData.getPoolQueueSize())) {
+                @Override
+                public void terminated() { super.terminated(); }
+           };
     }
 
     private Properties prepareDbProperties() {
@@ -136,16 +139,26 @@ public class DataHandler implements IDataHandler {
     }
 
     private ArrayList<IManagedRowItem> handleLastParquetPart(ArrayList<Path> files, Path parentPath, String parentName, SparkSession sparkSession) {
+        if (files == null || files.isEmpty())
+            throw new NullArgumentException("The given array-list with files can't be null and its size can't be equal zero.");
+
+        if (parentPath == null)
+            throw new NullArgumentException("The given parent-path object can't be null.");
+
+        if (sparkSession == null)
+            throw new NullArgumentException("The given Spark-session object can't be null.");
+
+        IDataHandler.checkInputString(parentName);
         parquetParts = new ParquetCollection();
-        parquetParts.parentName = parentName;
+        parquetParts.setParentName(parentName);
 
         if (!parentPath.getName().contains(NOT_NEEDED_METAFILE_SUFFIX))
             files.add(parentPath);
 
-        parquetParts.files = files;
+        parquetParts.setFiles(files);
 
         try {
-            ParquetCollection clonedObject = (ParquetCollection)parquetParts.clone();
+            ParquetCollection clonedObject = (ParquetCollection)parquetParts.createCopy();
             threadPool.execute(new ParallelRowsHandler(logger, this, sparkSession, clonedObject));
         } catch (Exception exception) {
             logger.error(exception);
@@ -155,10 +168,17 @@ public class DataHandler implements IDataHandler {
     }
 
     private void handleMiddlewareParquetParts(ArrayList<Path> files, String parentName, SparkSession sparkSession) {
-        parquetParts.files = files;
+        if (files == null || files.isEmpty())
+            throw new NullArgumentException("The given array-list with file-paths can't be null and its size can't be equal zero.");
+
+        if (sparkSession == null)
+            throw new NullArgumentException("The given Spark-session object can't be null.");
+
+        IDataHandler.checkInputString(parentName);
+        parquetParts.setFiles(files);
 
         try {
-            ParquetCollection clonedObject = (ParquetCollection)parquetParts.clone();
+            ParquetCollection clonedObject = (ParquetCollection)parquetParts.createCopy();
             this.files     = new ArrayList<>();
             parquetParts   = null;
             lastParentName = parentName;
@@ -276,7 +296,7 @@ public class DataHandler implements IDataHandler {
                 return handleLastParquetPart(files, filePath, parentName, sparkSession);
 
             if (lastParentName.equals(parentName))
-                parquetParts.parentName = parentName;
+                parquetParts.setParentName(parentName);
             else if (!lastParentName.equals(parentName))
                 handleMiddlewareParquetParts(files, parentName, sparkSession);
 
@@ -340,14 +360,11 @@ public class DataHandler implements IDataHandler {
 
     public void startTransaction() {
         SparkSession sparkSession = null;
-        DummyThread dummyThread   = null;
 
         try {
             final SparkSession.Builder builder = SparkSession.builder();
             final SparkConf sparkConfiguration = createSparkConfig();
             sparkSession = builder.config(sparkConfiguration).getOrCreate();
-            dummyThread  = new DummyThread(logger, threadPool);
-            dummyThread.start();
 
             switch (argsData.getToolAction()) {
                 case READ_RDBMS_AND_WRITE_TO_HDFS:
@@ -355,6 +372,8 @@ public class DataHandler implements IDataHandler {
                     saveToHdfs(dataset);
                     break;
                 case READ_HDFS_AND_WRITE_TO_RDBMS:
+                    final DummyThread dummyThread = new DummyThread(logger, threadPool);
+                    dummyThread.start();
                     handleSavedHdfsData(sparkSession);
                     dummyThread.join();
                     break;
@@ -363,6 +382,8 @@ public class DataHandler implements IDataHandler {
             }
         } catch (Exception exception) {
             logger.error(exception);
+            Thread.currentThread().interrupt();
+            System.exit(DEFAULT_UNSUCCESSFUL_EXIT_CODE);
         } finally {
             if (sparkSession != null)
                 sparkSession.close();

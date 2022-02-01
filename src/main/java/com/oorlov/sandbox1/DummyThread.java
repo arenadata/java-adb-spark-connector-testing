@@ -1,5 +1,6 @@
 package com.oorlov.sandbox1;
 import java.util.concurrent.ThreadPoolExecutor;
+import org.apache.commons.lang.NullArgumentException;
 import org.apache.log4j.Logger;
 
 public class DummyThread extends Thread {
@@ -13,10 +14,17 @@ public class DummyThread extends Thread {
     private boolean continueToRun = true;
 
     public DummyThread(Logger logger, ThreadPoolExecutor threadPool) {
+        if (logger == null)
+            throw new NullArgumentException("The input logger object can't be null.");
+
+        if (threadPool == null)
+            throw new NullArgumentException("The input thread pool object can't be null.");
+
         this.logger     = logger;
         this.threadPool = threadPool;
     }
 
+    @Override
     public void run() {
         while (continueToRun) {
             try {
@@ -27,6 +35,7 @@ public class DummyThread extends Thread {
                     continueToRun = false;
             } catch (InterruptedException exception) {
                 logger.error(exception);
+                Thread.currentThread().interrupt();
             }
         }
 
