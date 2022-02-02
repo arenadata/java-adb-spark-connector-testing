@@ -188,6 +188,24 @@ public class DataHandler implements IDataHandler {
         }
     }
 
+    private void handleParquetSubrows(Row[] rawParquetRows, ArrayList<IManagedRowItem> managedItems) {
+        if (rawParquetRows == null || rawParquetRows.length == 0)
+            throw new NullArgumentException("The input raw parquet rows-array can't be null or its size can't be equal zero.");
+
+        if (managedItems == null)
+            throw new NullArgumentException("The input managed items array-list can't be null.");
+
+        for (Row row : rawParquetRows) {
+            logger.info(String.format("Deserialized object from the parquet-file: %s", row.toString()));
+            IManagedRowItem item = new ManagedRowItem();
+            item.setId((Integer)row.get(ManagedRowItem.PARQUET_POSITION_FIELD_ID));
+            item.setDatetime((Date)row.get(ManagedRowItem.PARQUET_POSITION_FIELD_DATETIME));
+            item.setValue((String)row.get(ManagedRowItem.PARQUET_POSITION_FIELD_VALUE));
+            item.setPart((Integer)row.get(ManagedRowItem.PARQUET_POSITION_FIELD_PART));
+            managedItems.add(item);
+        }
+    }
+
     public ArrayList<IManagedRowItem> prepareManagedRows(SparkSession sparkSession, ArrayList<Path> files) {
         if (sparkSession == null)
             throw new NullArgumentException("Can't prepare the managed rows 'arraylist', due the input Spark-session object can't be null.");
@@ -200,15 +218,8 @@ public class DataHandler implements IDataHandler {
         for (Path hdfsPath : files) {
             logger.info(String.format("Going to read next file from HDFS: %s", hdfsPath.toString()));
             Dataset<Row> dataset = sparkSession.read().parquet(hdfsPath.toString());
-            Row row = dataset.first();
-            logger.info(String.format("Deserialized object from the parquet-file: %s", row.toString()));
-
-            IManagedRowItem item = new ManagedRowItem();
-            item.setId((Integer)row.get(ManagedRowItem.PARQUET_POSITION_FIELD_ID));
-            item.setDatetime((Date)row.get(ManagedRowItem.PARQUET_POSITION_FIELD_DATETIME));
-            item.setValue((String)row.get(ManagedRowItem.PARQUET_POSITION_FIELD_VALUE));
-            item.setPart((Integer)row.get(ManagedRowItem.PARQUET_POSITION_FIELD_PART));
-            managedItems.add(item);
+            Row[] rows = (Row[])dataset.collect();
+            handleParquetSubrows(rows, managedItems);
         }
 
         return managedItems;
