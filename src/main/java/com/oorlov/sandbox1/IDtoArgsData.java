@@ -29,6 +29,10 @@ public interface IDtoArgsData {
     void setSparkAppName(String value);
     boolean getAdbConnectorUsageValue();
     void setAdbConnectorUsageValue(boolean value);
+    String getAdbPartitionColumnName();
+    void setAdbPartitionColumnName(String value);
+    int getAdbPartitionAmount();
+    void setAdbPartitionAmount(int value) throws CustomException;
     int getSliceDelta();
     void setSliceDelta(int value) throws CustomException;
     int getCorePoolSize();

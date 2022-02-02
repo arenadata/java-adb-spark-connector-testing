@@ -88,11 +88,13 @@ public class DataHandler implements IDataHandler {
             } else {
                 dataset = sparkSession.read()
                           .format("adb")
-                          .option("spark.adb.url", argsData.getJdbcConnectionString())
-                          .option("spark.adb.user", argsData.getDbUser())
-                          .option("spark.adb.password", argsData.getDbPwd())
-                          .option("spark.adb.dbschema", argsData.getDbTestSchema())
-                          .option("spark.adb.dbtable", getTargetTableName())
+                          .option("spark.adb.partition.column" , argsData.getAdbPartitionColumnName())
+                          .option("spark.adb.partition.count"  , argsData.getAdbPartitionAmount())
+                          .option("spark.adb.url"              , argsData.getJdbcConnectionString())
+                          .option("spark.adb.user"             , argsData.getDbUser())
+                          .option("spark.adb.password"         , argsData.getDbPwd())
+                          .option("spark.adb.dbschema"         , argsData.getDbTestSchema())
+                          .option("spark.adb.dbtable"          , getTargetTableName())
                           .load();
             }
         } catch (Exception exception) {
@@ -380,7 +382,14 @@ public class DataHandler implements IDataHandler {
             switch (argsData.getToolAction()) {
                 case READ_RDBMS_AND_WRITE_TO_HDFS:
                     final Dataset<Row> dataset = prepareDatasetObject(sparkSession);
-                    saveToHdfs(dataset);
+
+                    if (dataset == null)
+                        throw new CustomException("The given Spark-dataset object can't be null.");
+
+                    if (argsData.getAdbConnectorUsageValue())
+                        dataset.write().parquet(String.format("%spart_", argsData.getHdfsOutputPath()));
+                    else
+                        saveToHdfs(dataset);
                     break;
                 case READ_HDFS_AND_WRITE_TO_RDBMS:
                     final DummyThread dummyThread = new DummyThread(logger, threadPool);

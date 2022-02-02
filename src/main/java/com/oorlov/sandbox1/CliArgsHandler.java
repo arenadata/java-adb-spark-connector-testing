@@ -86,6 +86,12 @@ public class CliArgsHandler implements ICliArgsHandler {
                 case "use_adb_connector":
                     dto.setAdbConnectorUsageValue(Boolean.parseBoolean(value));
                     break;
+                case "adb_partition_column_name":
+                    dto.setAdbPartitionColumnName(value);
+                    break;
+                case "adb_partition_count":
+                    dto.setAdbPartitionAmount(Integer.parseInt(value));
+                    break;
                 case "tool_action":
                     dto.setToolAction(value);
                     break;

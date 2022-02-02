@@ -16,13 +16,15 @@ public class DtoArgsData implements IDtoArgsData {
     private String  hdfsOutputPath;
     private String  sparkMasterHost;
     private String  sparkAppName;
-    private boolean useAdbConnector = false;
-    private int     sliceDelta      = DEFAULT_INT_INIT_VALUE;
-    private int     corePoolSize    = DEFAULT_INT_INIT_VALUE;
-    private int     maximumPoolSize = DEFAULT_INT_INIT_VALUE;
-    private int     poolQueueSize   = DEFAULT_INT_INIT_VALUE;
-    private long    keepAliveTime   = DEFAULT_INT_INIT_VALUE;
-    private EToolAction toolAction  = EToolAction.NONE;
+    private String  adbPartitionColumnName;
+    private boolean useAdbConnector    = false;
+    private int     adbPartitionAmount = DEFAULT_INT_INIT_VALUE;
+    private int     sliceDelta         = DEFAULT_INT_INIT_VALUE;
+    private int     corePoolSize       = DEFAULT_INT_INIT_VALUE;
+    private int     maximumPoolSize    = DEFAULT_INT_INIT_VALUE;
+    private int     poolQueueSize      = DEFAULT_INT_INIT_VALUE;
+    private long    keepAliveTime      = DEFAULT_INT_INIT_VALUE;
+    private EToolAction toolAction     = EToolAction.NONE;
 
     public String getJdbcConnectionString() {
         return this.jdbcConnectionString;
@@ -141,9 +143,25 @@ public class DtoArgsData implements IDtoArgsData {
         this.sparkAppName = value;
     }
 
+    public boolean getAdbConnectorUsageValue() { return this.useAdbConnector; }
+
     public void setAdbConnectorUsageValue(boolean value) { this.useAdbConnector = value; }
 
-    public boolean getAdbConnectorUsageValue() { return this.useAdbConnector; }
+    public String getAdbPartitionColumnName() { return this.adbPartitionColumnName; }
+
+    public void setAdbPartitionColumnName(String value) {
+        IDataHandler.checkInputString(value);
+        this.adbPartitionColumnName = value;
+    }
+
+    public int getAdbPartitionAmount() { return this.adbPartitionAmount; }
+
+    public void setAdbPartitionAmount(int value) throws CustomException {
+        if (value <= 0)
+            throw new CustomException("The input integer for the ADB partition amount value can't be less/equal zero.");
+
+        this.adbPartitionAmount = value;
+    }
 
     public int getSliceDelta() {
         return this.sliceDelta;
